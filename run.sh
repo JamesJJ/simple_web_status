@@ -1,6 +1,8 @@
 #!/bin/bash
 
 [ -z "${SLEEP}" ] && SLEEP='30'
+export SLEEP
+export CURL_ARGS
 
 [ ! -f /etc/curl_tests.txt ] && \
 [ ! -z "${CURL_TESTS}" ] && \
