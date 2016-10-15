@@ -2,7 +2,9 @@
 
 [ -z "${SLEEP}" ] && SLEEP='30'
 export SLEEP
-export CURL_ARGS
+[ ! -z "${CURL_ARGS}" ] && export CURL_ARGS
+[ ! -z "${TITLE}" ] && export TITLE
+
 
 [ ! -f /etc/curl_tests.txt ] && \
 [ ! -z "${CURL_TESTS}" ] && \

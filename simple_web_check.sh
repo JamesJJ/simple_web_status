@@ -11,12 +11,15 @@ IFS=$'\n'
 TESTS=($(cat /etc/curl_tests.txt | egrep -v '^#'))
 
 [ -z "${CURL_ARGS}" ] && CURL_ARGS='-A "ops-curl-check/1.0" --max-time 2 --retry 0 --tlsv1.2'
+[ -z "${TITLE}" ] && TITLE='Health Status'
 
 cat - <<EOF > "${F}.tmp"
 <html>
   <head>
+    <meta charset="UTF-8">
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <title>${TITLE}</title>
 
     <script type="text/javascript">
         setTimeout(function(){
@@ -83,10 +86,8 @@ cat - <<EOF > "${F}.tmp"
 
   </head>
   <body>
-  <h1>Health Status</h1>
-EOF
-echo "<p>$(date -u)</p>" >> "${F}.tmp"
-cat - <<EOF >> "${F}.tmp"
+    <h1>${TITLE}</h1>
+    <p>$(date -u)</p>
     <table class="table table-responsive table-bordered table-condensed">
       <tr>
        <th>Result</th>
