@@ -4,11 +4,12 @@
 export SLEEP
 [ ! -z "${CURL_ARGS}" ] && export CURL_ARGS
 [ ! -z "${TITLE}" ] && export TITLE
+[ ! -z "${RESULT_SORT}" ] && export RESULT_SORT
 
 
 [ ! -f /etc/curl_tests.txt ] && \
 [ ! -z "${CURL_TESTS}" ] && \
-cat <<EO_TESTS > "/etc/curl_tests.txt"
+cat <<EO_TESTS | tee "/etc/curl_tests.txt"
 $CURL_TESTS
 EO_TESTS
 

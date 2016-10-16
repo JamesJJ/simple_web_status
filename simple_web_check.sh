@@ -5,6 +5,9 @@ mkdir -p /var/www
 F='/var/www/index.html'
 
 [ ! -f /etc/curl_tests.txt ] && exit 1
+echo > "${F}.PASS.tmp"
+echo > "${F}.FAIL.tmp"
+echo > "${F}.USER.tmp"
 
 IFS=$'\n'
 
@@ -12,6 +15,8 @@ TESTS=($(cat /etc/curl_tests.txt | egrep -v '^#'))
 
 [ -z "${CURL_ARGS}" ] && CURL_ARGS='-A "ops-curl-check/1.0" --max-time 2 --retry 0 --tlsv1.2'
 [ -z "${TITLE}" ] && TITLE='Health Status'
+[ "${RESULT_SORT}" != "USER" ] && RESULT_SORT='RESULT'
+
 
 cat - <<EOF > "${F}.tmp"
 <html>
@@ -102,8 +107,7 @@ EOF
 for TEST in "${TESTS[@]}"
 do
   printf "" > /tmp/simple_check_body
-  R='FAIL'
-  CLASS='danger'
+  EXT='USER.tmp'
   T=($(echo "${TEST}" | awk  ' { split($0,a,","); print substr(a[1],0,32) "\n" a[2] "\n" a[3] } '))
   HTTP="$(curl ${CURL_ARGS} -s -o /tmp/simple_check_body -w "%{http_code}" "${T[2]}")"
   BODY="$(cat /tmp/simple_check_body | perl -C7 -0777 -n -Mutf8 -mHTML::Entities -e 'print HTML::Entities::encode_entities(substr(join("",$_),0,200)) ;')"
@@ -117,11 +121,16 @@ do
   then
     R='PASS'
     CLASS='success'
+    [ "${RESULT_SORT}" = 'RESULT' ] && EXT='PASS.tmp'
+  else
+    R='FAIL'
+    CLASS='danger'
+    [ "${RESULT_SORT}" = 'RESULT' ] && EXT='FAIL.tmp'
   fi
-  echo "<tr class=\"${CLASS}\"><td>${R}</td><td>${T[0]}</td><td>${T[1]}</td><td>${HTTP}</td><td class=\"vsmall\">${T[2]}</td><td class=\"vsmall\">${BODY}</td><tr>" >> "${F}.tmp"
+  echo "<tr class=\"${CLASS}\"><td>${R}</td><td>${T[0]}</td><td>${T[1]}</td><td>${HTTP}</td><td class=\"vsmall\">${T[2]}</td><td class=\"vsmall\">${BODY}</td><tr>" >> "${F}.${EXT}"
 done
 
-cat - <<EOF >> "${F}.tmp"
+cat "${F}.USER.tmp" "${F}.FAIL.tmp" "${F}.PASS.tmp" - <<EOF >> "${F}.tmp"
     </table>
   </body>
 </html>
