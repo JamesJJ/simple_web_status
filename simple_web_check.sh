@@ -9,14 +9,20 @@ echo > "${F}.PASS.tmp"
 echo > "${F}.FAIL.tmp"
 echo > "${F}.USER.tmp"
 
-IFS=$'\n'
+get_test_t() {
+  local IFS=$'\n' 
+  T=($(echo "${TEST}" | awk  ' { split($0,a,","); print substr(a[1],0,32) "\n" a[2] "\n" a[3] } '))
+}
 
-TESTS=($(cat /etc/curl_tests.txt | egrep -v '^#'))
+read_tests() {
+  local IFS=$'\n' 
+  TESTS=($(cat /etc/curl_tests.txt | egrep -v '^#'))
+}
+read_tests
 
-[ -z "${CURL_ARGS}" ] && CURL_ARGS='-A "ops-curl-check/1.0" --max-time 2 --retry 0 --tlsv1.2'
+[ -z "${CURL_ARGS}" ] && CURL_ARGS='-A ops-curl-check/1.0 --max-time 3 --retry 0 --tlsv1.2'
 [ -z "${TITLE}" ] && TITLE='Health Status'
 [ "${RESULT_SORT}" != "USER" ] && RESULT_SORT='RESULT'
-
 
 cat - <<EOF > "${F}.tmp"
 <html>
@@ -108,7 +114,7 @@ for TEST in "${TESTS[@]}"
 do
   printf "" > /tmp/simple_check_body
   EXT='USER.tmp'
-  T=($(echo "${TEST}" | awk  ' { split($0,a,","); print substr(a[1],0,32) "\n" a[2] "\n" a[3] } '))
+  get_test_t
   HTTP="$(curl ${CURL_ARGS} -s -o /tmp/simple_check_body -w "%{http_code}" "${T[2]}")"
   BODY="$(cat /tmp/simple_check_body | perl -C7 -0777 -n -Mutf8 -mHTML::Entities -e 'print HTML::Entities::encode_entities(substr(join("",$_),0,200)) ;')"
   # echo '============'
