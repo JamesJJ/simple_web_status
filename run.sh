@@ -17,6 +17,10 @@ cat <<EO_PW_FILE1 > "/etc/nginx/conf.d/.htpasswd1"
 $BASIC_AUTH1
 EO_PW_FILE1
 
+cat <<EO_NGINX_EXTRA_CONF > "/etc/nginx/conf.d/nginx_extra_config.inc"
+$NGINX_EXTRA_CONFIG
+EO_NGINX_EXTRA_CONF
+
 screen -d -m bash -c 'while true; do ./simple_web_check.sh; sleep "${SLEEP}";done'
 
 exec nginx -g 'daemon off;'
