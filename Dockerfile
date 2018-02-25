@@ -7,6 +7,7 @@ RUN \
   apk add \
   curl \
   bash \
+  perl \
   screen \
   perl-html-parser \
   && \

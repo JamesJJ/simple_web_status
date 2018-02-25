@@ -1,5 +1,5 @@
-#name,expected,url
+#name,expected,url,http_host
 Example Site 1,200,http://test.example.com/hello.html
 Example Site 2,200,http://www.google.com/
 Example Site 3,302,http://www.google.com/
-Simple Web Check Self-Check,401,http://localhost:8888
+Simple Web Check Self-Check,401,http://localhost:8888,status.example.net

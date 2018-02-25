@@ -11,7 +11,7 @@ echo > "${F}.USER.tmp"
 
 get_test_t() {
   local IFS=$'\n' 
-  T=($(echo "${TEST}" | awk  ' { split($0,a,","); print substr(a[1],0,32) "\n" a[2] "\n" a[3] } '))
+  T=($(echo "${TEST}" | awk  ' { split($0,a,","); print substr(a[1],0,32) "\n" a[2] "\n" a[3] "\n" a[4] } '))
 }
 
 read_tests() {
@@ -115,7 +115,15 @@ do
   printf "" > /tmp/simple_check_body
   EXT='USER.tmp'
   get_test_t
-  HTTP="$(curl ${CURL_ARGS} -s -o /tmp/simple_check_body -w "%{http_code}" "${T[2]}")"
+  if [ -z "${T[3]}" ]
+  then
+    CURL_ARGS_GO="${CURL_ARGS}"
+    HOST_HTML=""
+  else
+    CURL_ARGS_GO="${CURL_ARGS} -H Host:${T[3]}"
+    HOST_HTML="<br>(${T[3]})"
+  fi
+  HTTP="$(curl ${CURL_ARGS_GO} -s -o /tmp/simple_check_body -w "%{http_code}" "${T[2]}")"
   BODY="$(cat /tmp/simple_check_body | perl -C7 -0777 -n -Mutf8 -mHTML::Entities -e 'print HTML::Entities::encode_entities(substr(join("",$_),0,200)) ;')"
   # echo '============'
   # echo "${T[0]}"
@@ -133,7 +141,7 @@ do
     CLASS='danger'
     [ "${RESULT_SORT}" = 'RESULT' ] && EXT='FAIL.tmp'
   fi
-  echo "<tr class=\"${CLASS}\"><td>${R}</td><td>${T[0]}</td><td>${T[1]}</td><td>${HTTP}</td><td class=\"vsmall\">${T[2]}</td><td class=\"vsmall\">${BODY}</td><tr>" >> "${F}.${EXT}"
+  echo "<tr class=\"${CLASS}\"><td>${R}</td><td>${T[0]}</td><td>${T[1]}</td><td>${HTTP}</td><td class=\"vsmall\">${T[2]}${HOST_HTML}</td><td class=\"vsmall\">${BODY}</td><tr>" >> "${F}.${EXT}"
 done
 
 cat "${F}.USER.tmp" "${F}.FAIL.tmp" "${F}.PASS.tmp" - <<EOF >> "${F}.tmp"
