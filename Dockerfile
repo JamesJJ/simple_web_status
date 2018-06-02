@@ -3,15 +3,12 @@ FROM nginx:stable-alpine
 MAINTAINER JamesJJ@users.noreply.github.com
 
 RUN \
-  apk update && \
-  apk add \
+  apk add --no-cache \
   curl \
   bash \
   perl \
   screen \
   perl-html-parser \
-  && \
-  rm -f /var/cache/apk/APKINDEX.*.gz \
   && mkdir -p /var/www
 
 COPY initial.html /var/www/initial.html
